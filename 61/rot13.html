@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HexAndBin</title>
+    <style>
+        section {
+            display: flex;
+        }
+
+        div {
+            margin-right: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>For English users</h1>
+    <section>
+        <div>
+            <h2 style="color: red;">Rot13 Encrypt</h2>
+            <p>Input text</p>
+            <input type="text" id="textEncEng"> <br> <br>
+
+            <button id="startEncEng">Go Encrypt</button>
+
+            <p>Output</p>
+            <textarea type="text" id="resEncEng" size="40px"></textarea> <br>
+            <br><br>
+
+        </div>
+
+        <div>
+            <h2 style="color: blue;">Rot13 Decrypt</h2>
+            <p>Input text</p>
+            <input type="text" id="textDecEng"> <br> <br>
+
+            <button id="startDecEng">Go Decrypt</button>
+
+            <p>Output</p>
+            <textarea type="text" id="resDecEng" size="40px"></textarea> <br>
+
+        </div>
+    </section>
+
+    <h1>Для русских</h1>
+    <section>
+        <div>
+            <h2 style="color: green;">Rot13 Шифратор</h2>
+            <p>Вставьте текст</p>
+            <input type="text" id="textEncRus"> <br> <br>
+
+            <button id="startEncRus">Go Encrypt</button>
+
+            <p>Результат будет здесь</p>
+            <textarea type="text" id="resEncRus" size="40px"></textarea> <br>
+            <br><br>
+
+        </div>
+
+        <div>
+            <h2 style="color: magenta;">Rot13 Дешифратор</h2>
+            <p>Вставьте текст</p>
+            <input type="text" id="textDecRus"> <br> <br>
+
+            <button id="startDecRus">Go Decrypt</button>
+
+            <p>Результат будет здесь</p>
+            <textarea type="text" id="resDecRus" size="40px"></textarea> <br>
+
+        </div>
+    </section>
+
+
+    <script src="js.js"></script>
+</body>
+
+</html>
