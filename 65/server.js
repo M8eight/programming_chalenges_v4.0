@@ -22,7 +22,7 @@ const server = http.createServer((req, res) => {
 
             var YoutubeMp3Downloader = require("youtube-mp3-downloader");
             var YD = new YoutubeMp3Downloader({
-                "ffmpegPath": 'ffmpeg',
+                "ffmpegPath": 'externalLib/ffmpeg/ffmpeg.exe',
                 "outputPath": "./video",
                 "youtubeVideoQuality": "highestaudio",
                 "progressTimeout": 2000,

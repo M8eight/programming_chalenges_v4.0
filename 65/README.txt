@@ -1,1 +1,1 @@
-This task is done on node.js, run npm install, and run 'node server.js', paste the link into the field and click send, look at the console for the process, all downloaded audios are in the video folder
+This task is performed on node.js, run npm install and run "node server.js", paste the link into the field and click "Submit", look at the process in the console, all downloaded audios are in the video folder.
