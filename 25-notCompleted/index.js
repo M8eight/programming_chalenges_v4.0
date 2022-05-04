@@ -1,41 +1,36 @@
-import moment from "moment";
-import cookieParser from "cookie-parser";
-import session from "express-session";
-import flash from "connect-flash";
-import express from "express";
+import moment from "moment";		//helpers
 import chalk from "chalk";
+
+import cookieParser from "cookie-parser";		//Cookie etc
+import session from "express-session";		
+import flash from "connect-flash";
+
+import express from "express";		//express
 const app = express();
 
-import {
-	findAllBoards,
-	findMessage,
-	createBoard,
-	createMessage,
-	getBoardsCount,
-	getMessagesCount
-} from "./src/boardsController.js";
+import BoardsController from "./src/Controllers/BoardsController.js";
 
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
+app.set("view engine", "pug");
+app.locals.moment = moment;
+const jsonParser = express.json();
 
-app.use(cookieParser("Secret"));
 app.use(
 	session({
 		cookie: { maxAge: 1000000 },
 		resave: true,
 		saveUninitialized: true,
-		secret: 'Secret'
+		secret: "Secret",
 	})
 );
+app.use(cookieParser("Secret"));
 app.use(flash());
 
-app.set("view engine", "pug");
-app.locals.moment = moment;
-const jsonParser = express.json();
 
 app.get("/", (req, res) => {
 	let error = req.flash("error");
-	if(error.length == 0) error = false
+	if (error.length == 0) error = false;
 	res.render("index.pug", {
 		error: error,
 	});
@@ -43,78 +38,113 @@ app.get("/", (req, res) => {
 
 app.get("/boards", (req, res) => {
 	const nickname = req.cookies.nickname;
-	findAllBoards((data) => {
-		if (data) {
-			res.render("allBoards.pug", {
-				boards: data,
-				nickname: nickname,
-			});
-		} else {
-			req.flash("error", "Ошибка сервера");
-			res.redirect("/");
-		}
-	});
+
+	try {
+		BoardsController.findAllBoards((data) => {
+			if (data) {
+				res.render("allBoards.pug", {
+					boards: data,
+					nickname: nickname,
+				});
+			} else {
+				throw "Ошибка сервера";
+			}
+		});
+	} catch (err) {
+		req.flash("error", err);
+		res.redirect("/");
+	}
 });
 
 app.get("/board/:id", (req, res) => {
 	const boardId = req.params.id;
 
-	findMessage(boardId, function (messages) {
-		if (messages) {
-			res.render("board.pug", {
-				messages: messages,
-				boardId: boardId,
-				nickname: req.cookies.nickname,
-			});
-		} else {
-			req.flash("error", "Доска не существует");
-			res.redirect("/");
+	try {
+		if (!boardId) {
+			throw "Ошибка";
 		}
-	});
+
+		BoardsController.findMessage(boardId, function (messages) {
+			if (messages) {
+				res.render("board.pug", {
+					messages: messages,
+					boardId: boardId,
+					nickname: req.cookies.nickname,
+				});
+			} else {
+				throw "Такой доски не существует";
+			}
+		});
+	} catch (err) {
+		req.flash("error", err);
+		res.redirect("/");
+	}
 });
 
 app.post("/board", jsonParser, (req, res) => {
 	const name = req.body.name;
 	const author = req.cookies.nickname;
-	createBoard(name, author, (status) => {
-		if (status) {
-			res.redirect("/boards");
-		} else {
-			req.flash("error", "Не удалось создать доску");
-			res.redirect("/");
-		}
-	});
-});
 
-app.get("/stats", (req, res) => {
-	getBoardsCount((boardsCount) => {
-		getMessagesCount((messagesCount) => {
-			res.render("stats.pug", {
-				nickname: req.cookies.nickname,
-				boardsCount: boardsCount.count,
-				messagesCount: messagesCount.count
-			});
+	try {
+		if (name.length == 0 || author.length == 0) throw "Неверно заполнены данные";
+
+		BoardsController.createBoard(name, author, (status) => {
+			if (status) {
+				res.redirect("/boards");
+			} else {
+				throw "Ошибка сервера";
+			}
 		});
-	});
+	} catch (err) {
+		req.flash("error", err);
+		res.redirect("/");
+	}
 });
 
 app.post("/message", jsonParser, (req, res) => {
 	const message = req.body.message;
 	const author = req.cookies.nickname;
 	const boardId = req.body.boardId;
-	if (!message || !author || !boardId) {
-		req.flash("error", "Неверно заполнена форма");
+
+	try {
+		if (message.length == 0 || author.length == 0 || boardId.length == 0) {
+			throw "Неверно заполнена форма";
+		}
+
+		BoardsController.createMessage(author, message, boardId, (status) => {
+			if (status) {
+				res.redirect("/board/" + boardId);
+			} else {
+				throw "Ошибка сервера или доски не существует";
+			}
+		});
+	} catch (err) {
+		req.flash("error", err);
 		res.redirect("/");
 	}
+});
 
-	createMessage(author, message, boardId, (status) => {
-		if (status) {
-			res.redirect("/board/" + boardId);
-		} else {
-			req.flash("error", "Ошибка сервера");
-			res.redirect("/");
-		}
-	});
+app.get("/stats", (req, res) => {
+	try {
+		BoardsController.getBoardsCount((boardsCount) => {
+			if (!boardsCount) {
+				throw "Ошибка сервера";
+			}
+			BoardsController.getMessagesCount((messagesCount) => {
+				if (!messagesCount) {
+					throw "Ошибка сервера";
+				}
+				res.render("stats.pug", {
+					nickname: req.cookies.nickname,
+					boardsCount: boardsCount.count,
+					messagesCount: messagesCount.count,
+				});
+			});
+		});
+	} catch (err) {
+		req.flash("error", err);
+		res.redirect("/");
+	}
 });
 
 app.get("/nickname", (req, res) => {
