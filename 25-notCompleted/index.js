@@ -3,7 +3,7 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import flash from "connect-flash";
 import express from "express";
-import express from "chalk";
+import chalk from "chalk";
 const app = express();
 
 import {
